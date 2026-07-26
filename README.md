@@ -10,9 +10,9 @@ explained, and evaluated model.
 ## Author
 
 **Rajesh Kumar Sahoo**
-Master of Science in Artificial Intelligence, 
-University of the Cumberlands
-rsahoo44691@ucumberlands.edu
+- Master of Science in Artificial Intelligence, 
+- University of the Cumberlands
+- rsahoo44691@ucumberlands.edu
 
 ## Weeks
 
