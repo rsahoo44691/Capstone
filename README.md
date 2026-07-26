@@ -7,6 +7,11 @@ records, 13 clinical features, binary target of disease presence vs. absence).
 The repository tracks the project week by week — from a baseline model to a tuned,
 explained, and evaluated model.
 
+## Live Demo
+
+- **App:** https://rajeshsahoo2006-heart-disease.hf.space
+- **Hugging Face Space (source):** https://huggingface.co/spaces/rajeshsahoo2006/Heart_Disease
+
 ## Author
 
 **Rajesh Kumar Sahoo**
