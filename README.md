@@ -7,6 +7,12 @@ records, 13 clinical features, binary target of disease presence vs. absence).
 The repository tracks the project week by week — from a baseline model to a tuned,
 explained, and evaluated model.
 
+## Author
+
+**Rajesh Kumar Sahoo**
+Master of Science in Artificial Intelligence, University of the Cumberlands
+rsahoo44691@ucumberlands.edu
+
 ## Weeks
 
 ### Week 3 — Baseline Model
