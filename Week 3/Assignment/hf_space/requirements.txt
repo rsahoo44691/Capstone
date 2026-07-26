@@ -1,0 +1,4 @@
+# gradio is provided by the Space SDK (sdk_version in README.md); do not pin it here
+scikit-learn>=1.3
+pandas>=2.0
+numpy>=1.24
