@@ -62,27 +62,58 @@ python test_api.py        # no pytest needed
 # or: python -m pytest test_api.py -v
 ```
 
-All 7 pass. They cover the health check, a valid prediction, threshold/decision
+All 10 pass. They cover the health check, a valid prediction, threshold/decision
 agreement, three rejection cases (out-of-range value, invalid category code,
-missing field), and a regression test that JSON key order cannot change the
+missing field), a regression test that JSON key order cannot change the
 prediction — the guard on the training-serving skew fix, since column order is
-taken from the artifact rather than from the caller.
+taken from the artifact rather than from the caller — and three covering the
+v1.1.0 behaviour: the tuned threshold, review flagging inside the uncertainty
+band, and no flagging outside it.
 
 ## Model
 
 Reproduces **Model B** from the Week 4 notebook (tuned logistic regression with
 feature engineering), selected `C = 0.3`, then calibrated. Held-out test set:
 
-| Metric | Value |
-|---|---|
-| Accuracy | 0.885 |
-| Precision | 0.839 |
-| Recall | 0.929 |
-| F1 | 0.881 |
-| ROC-AUC | 0.968 |
-| CV ROC-AUC (full dataset) | 0.921 |
+| Metric | v1.0.0 (threshold 0.5) | **v1.1.0 (threshold 0.25)** |
+|---|---|---|
+| Accuracy | 0.885 | 0.836 |
+| Precision | 0.839 | 0.737 |
+| **Recall** | 0.929 | **1.000** |
+| F1 | 0.881 | 0.848 |
+| ROC-AUC | 0.968 | 0.968 |
+| CV ROC-AUC (full dataset) | 0.921 | 0.921 |
+| False negatives | 2 | **0** |
 
-These match the Week 4 report exactly.
+The v1.0.0 column matches the Week 4 report exactly. ROC-AUC is unchanged because
+moving the threshold does not change the model's ranking, only where the cut is made.
+
+## v1.1.0 — changes driven by Week 6
+
+Week 6 testing (`Week 6/Assignment/model_testing_debugging.ipynb`) produced two
+changes to how this service behaves. Both are reliability improvements, and both
+cost accuracy on purpose.
+
+**1. Threshold moved from 0.5 to 0.25.** A threshold of 0.5 implicitly declares a
+missed diagnosis and a false alarm equally costly, which contradicts what every
+report in this project argues. Sweeping the threshold against an explicit 5:1
+false-negative cost put the optimum at 0.25, which **eliminates both false
+negatives** — recall goes to 1.000 — at the price of 5 extra false positives.
+Accuracy falls from 0.885 to 0.836, and that is the intended trade, not a
+regression.
+
+**2. Uncertain predictions are flagged.** Error analysis found that all seven test
+errors fell between probability 0.2 and 0.8, with **zero errors** among the 38
+patients scored outside that band. `/predict` now returns `requires_review: true`
+with a reason for anything inside it, so borderline cases go to a clinician instead
+of being acted on.
+
+```json
+{"probability":0.6512,"prediction":1,"label":"Disease likely","threshold":0.25,
+ "requires_review":true,
+ "review_reason":"Probability 0.65 falls in the 0.20-0.80 uncertainty band; refer to a clinician rather than acting on this result.",
+ "model_version":"1.1.0"}
+```
 
 ### Two notes on honesty
 

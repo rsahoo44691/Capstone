@@ -35,8 +35,22 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 RANDOM_STATE = 42
-MODEL_VERSION = "1.0.0"
-THRESHOLD = 0.5
+MODEL_VERSION = "1.1.0"
+
+# Week 6 changed these two constants; see Week 6/Assignment/model_testing_debugging.ipynb.
+#
+# THRESHOLD was 0.5 (the scikit-learn default) through v1.0.0. A default of 0.5
+# implicitly declares a missed diagnosis and a false alarm equally costly, which
+# contradicts what every report in this project argues. Section 6 of the Week 6
+# notebook swept the threshold against an explicit 5:1 false-negative cost and
+# found 0.25 removes both false negatives on the held-out set, lifting recall
+# from 0.929 to 1.000 at the price of 5 extra false positives.
+THRESHOLD = 0.25
+
+# Week 6 section 5a found every error falls between 0.2 and 0.8: zero errors in
+# the 20 patients scored below 0.2 and the 18 scored above 0.8. Predictions
+# inside this band are flagged for clinician review rather than acted on.
+REVIEW_BAND = (0.20, 0.80)
 
 HERE = Path(__file__).parent
 DATA = HERE / "processed.cleveland.data"
@@ -111,6 +125,7 @@ def main() -> None:
         "model": model,
         "model_version": MODEL_VERSION,
         "threshold": THRESHOLD,
+        "review_band": REVIEW_BAND,
         "features": FEATURES,
         "best_params": grid.best_params_,
         "metrics": metrics,

@@ -67,6 +67,13 @@ class PredictionResponse(BaseModel):
     label: str = Field(..., description="Human-readable decision")
     threshold: float = Field(
         ..., description="Operating threshold applied to the probability")
+    requires_review: bool = Field(
+        ...,
+        description=("True when the probability falls in the uncertainty band "
+                     "where Week 6 error analysis found every misclassification. "
+                     "Such predictions should go to a clinician, not be acted on."))
+    review_reason: Optional[str] = Field(
+        None, description="Why review was flagged, or null if not flagged")
     model_version: str = Field(
         ..., description="Version of the model artifact that served this request")
 

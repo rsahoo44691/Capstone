@@ -58,6 +58,22 @@ explained, and evaluated model.
   - **`train_model.py`** reproduces Week 4's Model B (`C = 0.3`, test ROC-AUC
     0.968) and calibrates it; **`test_api.py`** has 7 passing tests.
 
+### Week 6 — Testing, Evaluation and Debugging
+- **`Week 6/Assignment/model_testing_debugging.ipynb`** — statistical testing of the
+  Week 4 models, with an HTML render alongside it and MLflow tracking in `mlflow.db`:
+  - **Repeated cross-validation** — 10×5 folds, 50 estimates per model with 95%
+    intervals, replacing Week 4's single noisy 5-fold run.
+  - **A/B testing** — McNemar's exact test plus a Nadeau-Bengio corrected paired
+    t-test. Week 4's claim that gradient boosting had the best accuracy turns out to
+    rest on **one patient** (*p* = 1.00); logistic regression wins the corrected
+    50-fold comparison (*p* = 0.014).
+  - **Error analysis** — all 7 errors fall in the 0.2–0.8 probability band, with zero
+    errors among the 38 confidently scored patients.
+  - **Threshold tuning** — moving from 0.5 to 0.25 removes both false negatives
+    (recall 1.000), with a sensitivity check on the assumed cost ratio.
+
+  Both findings were shipped into the API as **v1.1.0**.
+
 ## Running the notebooks
 
 Each notebook loads `processed.cleveland.data` from its own directory, so it runs

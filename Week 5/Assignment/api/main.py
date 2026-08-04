@@ -94,6 +94,7 @@ def model_info() -> dict:
         "model_version": meta["model_version"],
         "model_type": "Calibrated logistic regression with feature engineering",
         "threshold": meta["threshold"],
+        "review_band": meta.get("review_band"),
         "best_params": meta["best_params"],
         "test_metrics": meta["metrics"],
         "features": meta["features"],
@@ -120,17 +121,29 @@ def predict(features: PatientFeatures) -> PredictionResponse:
     probability = float(model.predict_proba(row)[0, 1])
     threshold = meta["threshold"]
     prediction = int(probability >= threshold)
+
+    # Week 6 error analysis: all misclassifications fell inside this band, and
+    # there were none outside it. Flag rather than silently serve.
+    lo, hi = meta.get("review_band", (0.0, 0.0))
+    requires_review = bool(lo <= probability <= hi)
+    review_reason = (
+        f"Probability {probability:.2f} falls in the {lo:.2f}-{hi:.2f} "
+        "uncertainty band; refer to a clinician rather than acting on this result."
+        if requires_review else None)
+
     elapsed_ms = (time.perf_counter() - started) * 1000
 
     # Deliberately logs no patient features -- only non-identifying metadata.
-    log.info("predict model_version=%s outcome=%d latency_ms=%.1f",
-             meta["model_version"], prediction, elapsed_ms)
+    log.info("predict model_version=%s outcome=%d review=%s latency_ms=%.1f",
+             meta["model_version"], prediction, requires_review, elapsed_ms)
 
     return PredictionResponse(
         probability=round(probability, 4),
         prediction=prediction,
         label="Disease likely" if prediction else "No disease",
         threshold=threshold,
+        requires_review=requires_review,
+        review_reason=review_reason,
         model_version=meta["model_version"],
     )
 
