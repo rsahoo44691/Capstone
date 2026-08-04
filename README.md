@@ -44,6 +44,20 @@ explained, and evaluated model.
   The tuned logistic regression with feature engineering is the recommended model
   (test ROC-AUC 0.968, cross-validated 0.921 ± 0.019).
 
+### Week 5 — Deployment: Prediction API
+- **`Week 5/Assignment/api/`** — a FastAPI service implementing the serving
+  design from the Week 5 Deployment Strategy Report:
+  - **`POST /predict`** — 13 typed clinical features in, calibrated probability
+    plus a binary decision and the model version out. Pydantic range-checks
+    every field and rejects bad input with a 422 before the model sees it.
+  - **`GET /health`** and **`GET /model-info`** — load-balancer probe and model
+    provenance (hyperparameters, held-out metrics).
+  - **No training-serving skew** — the fitted `ColumnTransformer` pipeline is
+    serialized into `model.joblib` and loaded once at startup, so serving-time
+    preprocessing is identical to training-time.
+  - **`train_model.py`** reproduces Week 4's Model B (`C = 0.3`, test ROC-AUC
+    0.968) and calibrates it; **`test_api.py`** has 7 passing tests.
+
 ## Running the notebooks
 
 Each notebook loads `processed.cleveland.data` from its own directory, so it runs
@@ -56,6 +70,17 @@ jupyter notebook
 
 Open either notebook and run all cells. (The committed notebooks already include
 their executed outputs, so results are viewable on GitHub without re-running.)
+
+## Running the prediction API locally
+
+```bash
+cd "Week 5/Assignment/api"
+pip install -r requirements.txt
+uvicorn main:app --reload      # http://127.0.0.1:8000/docs
+```
+
+`model.joblib` is committed, so the service runs straight from a clone. Rebuild
+it with `python train_model.py` if you want to retrain.
 
 ## Running the Gradio app locally
 
