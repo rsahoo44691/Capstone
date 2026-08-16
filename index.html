@@ -76,6 +76,12 @@ li small{display:block;font-size:20px;color:var(--muted);margin-top:6px;line-hei
 .stat .num.red{color:var(--crimson)}
 .stat .lab{font-size:20px;color:var(--muted);margin-top:10px;line-height:1.35}
 .stat + .stat{margin-top:16px}
+/* Slide 3 stacks three stat boxes and the third one overflowed the body.
+   Tighten just those boxes so every caption survives intact. */
+.stat.sm{padding:16px 24px}
+.stat.sm .num{font-size:46px}
+.stat.sm .lab{font-size:18px;margin-top:8px}
+.stat.sm + .stat.sm{margin-top:12px}
 
 .callout{
   background:var(--navy);color:#fff;padding:26px 32px;border-radius:10px;
@@ -192,9 +198,9 @@ figcaption{font-size:18px;color:var(--muted);margin-top:12px;line-height:1.35}
   <div class="body">
     <div class="cols">
       <div>
-        <div class="stat"><div class="num">303</div><div class="lab">Patient records. 242 train, 61 held out for testing</div></div>
-        <div class="stat"><div class="num">13</div><div class="lab">Clinical features: age, sex, chest pain type, blood pressure, cholesterol, max heart rate, ST depression, vessels, and more</div></div>
-        <div class="stat"><div class="num">45.9%</div><div class="lab">Positive rate. 139 disease, 164 no disease, so near balanced</div></div>
+        <div class="stat sm"><div class="num">303</div><div class="lab">Patient records. 242 train, 61 held out for testing</div></div>
+        <div class="stat sm"><div class="num">13</div><div class="lab">Clinical features: age, sex, chest pain type, blood pressure, cholesterol, max heart rate, ST depression, vessels, and more</div></div>
+        <div class="stat sm"><div class="num">45.9%</div><div class="lab">Positive rate. 139 disease, 164 no disease, so near balanced</div></div>
       </div>
       <ul>
         <li>Only <strong>6 missing values</strong> in the whole dataset
@@ -343,10 +349,10 @@ figcaption{font-size:18px;color:var(--muted);margin-top:12px;line-height:1.35}
 
 <!-- 9 ------------------------------------------------------------------ -->
 <section class="slide"
- data-notes="I did not stop at the analysis. Both findings went into the live service, which is now version 1.1.0. First, the threshold is now 0.25, so there are no missed diagnoses on the held out set. Second, any prediction that lands in that uncertain band between 0.2 and 0.8 now comes back with a review flag and a short reason. It goes to a clinician instead of being returned as a confident answer. The test suite grew from 7 tests to 10, and all of them pass. There is also a live demo of the model running online. The point I want to leave you with is simple. An error analysis that changes nothing is just an academic exercise. These findings changed the running system.">
+ data-notes="I did not stop at the analysis. Both findings went into my prediction service, which is now version 1.1.0. First, the threshold is now 0.25, so there are no missed diagnoses on the held out set. Second, any prediction that lands in that uncertain band between 0.2 and 0.8 now comes back with a review flag and a short reason. It goes to a clinician instead of being returned as a confident answer. The test suite grew from 7 tests to 10, and all of them pass. I also have a public demo running online, but that one is my earlier Week 3 baseline. The point I want to leave you with is simple. An error analysis that changes nothing is just an academic exercise. These findings changed the code that serves patients.">
   <div class="head">
-    <div class="eyebrow">In Production</div>
-    <h2>The findings changed the running service</h2>
+    <div class="eyebrow">What Shipped</div>
+    <h2>Both findings shipped into the service</h2>
   </div>
   <div class="body">
     <div class="cols">
@@ -409,6 +415,7 @@ const slides=[...document.querySelectorAll('.slide')];
 const notes=document.getElementById('notes');
 const stage=document.getElementById('stage');
 let i=0, showNotes=false;
+
 
 function fit(){
   const pad = showNotes ? window.innerHeight*0.36 : 0;
