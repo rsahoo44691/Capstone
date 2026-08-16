@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capstone Presentation - Predicting Heart Disease Risk</title>
+<style>
+:root{
+  --navy:#003b70;
+  --crimson:#b21e27;
+  --ink:#111418;
+  --muted:#5b6672;
+  --line:#d8dee6;
+  --paper:#ffffff;
+  --shell:#eef2f6;
+  --font:"Source Sans Pro","Lato",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#e8eef4; --muted:#9aa9b8; --line:#2c3844;
+    --paper:#151b22; --shell:#0f1419;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#e8eef4; --muted:#9aa9b8; --line:#2c3844;
+  --paper:#151b22; --shell:#0f1419;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--shell);color:var(--ink);font-family:var(--font);
+  line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+
+header{
+  background:var(--navy);border-bottom:5px solid var(--crimson);
+  padding:26px 24px;
+}
+.wrap{max-width:1080px;margin:0 auto}
+.eyebrow{
+  font-size:14px;letter-spacing:.16em;text-transform:uppercase;
+  color:#9dc2ea;font-weight:700;margin-bottom:10px;
+}
+header h1{
+  color:#fff;font-size:clamp(26px,4.4vw,42px);line-height:1.12;
+  font-weight:800;letter-spacing:-.02em;
+}
+header .sub{color:#c8dcf0;font-size:clamp(15px,2vw,20px);margin-top:10px}
+
+main{max-width:1080px;margin:0 auto;padding:30px 24px 60px}
+
+.player{
+  background:#000;border-radius:12px;overflow:hidden;
+  box-shadow:0 10px 34px rgba(0,0,0,.22);
+}
+video{display:block;width:100%;height:auto;background:#000}
+
+.meta{
+  display:flex;flex-wrap:wrap;gap:10px 26px;align-items:baseline;
+  margin-top:18px;font-size:15px;color:var(--muted);
+}
+.meta .who{font-weight:700;color:var(--ink);font-size:17px}
+
+.card{
+  background:var(--paper);border:1px solid var(--line);border-left:6px solid var(--crimson);
+  border-radius:0 10px 10px 0;padding:20px 24px;margin-top:28px;
+}
+.card h2{font-size:19px;color:var(--navy);margin-bottom:8px;letter-spacing:-.01em}
+:root[data-theme="dark"] .card h2{color:#78b0ea}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .card h2{color:#78b0ea}
+}
+.card p{font-size:16px;color:var(--muted)}
+
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.btn{
+  display:inline-block;text-decoration:none;font-weight:700;font-size:15px;
+  padding:12px 22px;border-radius:8px;
+  background:var(--navy);color:#fff;border:2px solid var(--navy);
+}
+.btn.ghost{background:transparent;color:var(--navy);}
+:root[data-theme="dark"] .btn.ghost{color:#78b0ea;border-color:#78b0ea}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .btn.ghost{color:#78b0ea;border-color:#78b0ea}
+}
+
+footer{
+  border-top:1px solid var(--line);margin-top:44px;padding-top:20px;
+  font-size:14px;color:var(--muted);
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;
+}
+footer .mark{font-weight:700;color:var(--navy);letter-spacing:.03em}
+:root[data-theme="dark"] footer .mark{color:#78b0ea}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) footer .mark{color:#78b0ea}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">MSAI 699 Capstone Project</div>
+    <h1>Predicting Heart Disease Risk</h1>
+    <div class="sub">Building, testing, and correcting a clinical decision-support model</div>
+  </div>
+</header>
+
+<main>
+  <div class="player">
+    <video controls preload="metadata" playsinline poster="poster.jpg">
+      <source src="presentation.mp4" type="video/mp4">
+      Your browser cannot play this video. You can
+      <a href="presentation.mp4">open the file directly</a> instead.
+    </video>
+  </div>
+
+  <div class="meta">
+    <span class="who">Rajesh Kumar Sahoo</span>
+    <span>University of the Cumberlands</span>
+    <span>Master of Science in Artificial Intelligence</span>
+    <span>August 2026</span>
+  </div>
+
+  <div class="card">
+    <h2>What this talk shows</h2>
+    <p>
+      A model that predicts heart disease risk from 13 clinical measurements, and
+      the testing that proved one of its earlier conclusions wrong. Repeated
+      cross-validation and paired significance tests showed the accuracy ranking
+      between models was noise. Error analysis showed every mistake sat in one
+      narrow probability band, which turned two missed diagnoses into a threshold
+      problem with a fix.
+    </p>
+  </div>
+
+  <div class="actions">
+    <a class="btn" href="./">Open the slide deck</a>
+    <a class="btn ghost" href="https://github.com/rsahoo44691/Capstone">View the code on GitHub</a>
+  </div>
+
+  <footer>
+    <span class="mark">University of the Cumberlands</span>
+    <span>Educational decision support only. Not medical advice.</span>
+  </footer>
+</main>
+
+</body>
+</html>
