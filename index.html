@@ -134,7 +134,7 @@ figcaption{font-size:18px;color:var(--muted);margin-top:12px;line-height:1.35}
 </head>
 <body>
 
-<div id="hint">← → navigate &nbsp;·&nbsp; P presenter view &nbsp;·&nbsp; N notes &nbsp;·&nbsp; F fullscreen</div>
+<div id="hint">← → navigate &nbsp;·&nbsp; N notes &nbsp;·&nbsp; F fullscreen</div>
 
 <div id="stage">
 
@@ -408,34 +408,17 @@ figcaption{font-size:18px;color:var(--muted);margin-top:12px;line-height:1.35}
 const slides=[...document.querySelectorAll('.slide')];
 const notes=document.getElementById('notes');
 const stage=document.getElementById('stage');
-let i=0, showNotes=false, presenter=null;
-
-/* keep the presenter view in step */
-function broadcast(){
-  const msg={type:'slide',slide:i};
-  if(presenter&&!presenter.closed) presenter.postMessage(msg,'*');
-  if(window.opener&&!window.opener.closed) window.opener.postMessage(msg,'*');
-}
-function openPresenter(){
-  presenter=window.open('presenter.html','presenterWindow');
-  setTimeout(()=>{ if(presenter&&!presenter.closed){ presenter.postMessage({type:'hello'},'*'); broadcast(); } },900);
-}
-window.addEventListener('message',e=>{
-  const d=e.data||{};
-  if(d.type==='goto'&&typeof d.slide==='number'&&d.slide!==i){ i=d.slide; render(false); }
-  if(d.type==='hello'){ presenter=e.source; broadcast(); }
-});
+let i=0, showNotes=false;
 
 function fit(){
   const pad = showNotes ? window.innerHeight*0.36 : 0;
   const s=Math.min(window.innerWidth/1280,(window.innerHeight-pad)/720);
   stage.style.transform='scale('+s+')';
 }
-function render(push){
+function render(){
   slides.forEach((s,n)=>s.classList.toggle('active',n===i));
   notes.innerHTML='<b>Slide '+(i+1)+' of '+slides.length+'</b> &nbsp; '+(slides[i].dataset.notes||'');
   fit();
-  if(push!==false) broadcast();
 }
 function go(n){ i=Math.max(0,Math.min(slides.length-1,n)); render(); }
 
@@ -447,11 +430,9 @@ document.addEventListener('keydown',e=>{
   else if(e.key.toLowerCase()==='f'){
     document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
   }
-  else if(e.key.toLowerCase()==='p'){openPresenter()}
 });
 document.addEventListener('click',e=>{ if(!e.target.closest('#notes')) go(i+1) });
 window.addEventListener('resize',fit);
-if(window.opener&&!window.opener.closed){ presenter=window.opener; }
 render();
 </script>
 </body>
