@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Predicting Heart Disease Risk - MSAI 699 Capstone</title>
+<style>
+:root{
+  --navy:#003b70;
+  --navy-light:#2e6cd6;
+  --crimson:#b21e27;
+  --crimson-light:#e51e2a;
+  --ink:#111418;
+  --muted:#5b6672;
+  --line:#d8dee6;
+  --paper:#ffffff;
+  --font:"Source Sans Pro","Lato",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:#232a31;
+  font-family:var(--font);
+  color:var(--ink);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+#stage{position:relative;width:1280px;height:720px;transform-origin:center center;}
+.slide{
+  position:absolute;inset:0;
+  background:var(--paper);
+  display:none;
+  flex-direction:column;
+  padding:56px 72px 64px;
+  overflow:hidden;
+}
+.slide.active{display:flex}
+
+/* ---------- title + section slides ---------- */
+.slide.navy{background:var(--navy);color:#fff;justify-content:center;padding:72px 96px}
+.slide.navy .eyebrow{color:#9dc2ea}
+.slide.navy h1{color:#fff}
+
+.eyebrow{
+  font-size:19px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--crimson);font-weight:700;margin-bottom:18px;
+}
+h1{font-size:62px;line-height:1.08;font-weight:800;letter-spacing:-.02em}
+h2{font-size:44px;line-height:1.12;font-weight:800;letter-spacing:-.015em;color:var(--navy)}
+.sub{font-size:26px;color:var(--muted);margin-top:20px;line-height:1.4;font-weight:400}
+.slide.navy .sub{color:#c8dcf0}
+.rule{width:92px;height:6px;background:var(--crimson);border-radius:3px;margin:26px 0 0}
+
+.byline{margin-top:auto;font-size:21px;line-height:1.7;color:#c8dcf0}
+.byline strong{color:#fff;font-weight:700}
+
+/* ---------- content ---------- */
+.head{border-bottom:3px solid var(--navy);padding-bottom:18px;margin-bottom:30px}
+.body{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;overflow:hidden;padding-bottom:8px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;min-height:0}
+.cols.wide-left{grid-template-columns:1.35fr 1fr}
+.cols.wide-right{grid-template-columns:1fr 1.4fr}
+
+ul{list-style:none;display:flex;flex-direction:column;gap:20px}
+li{font-size:26px;line-height:1.42;padding-left:30px;position:relative;color:var(--ink)}
+li::before{
+  content:"";position:absolute;left:0;top:.55em;
+  width:13px;height:13px;background:var(--crimson);border-radius:3px;
+}
+li small{display:block;font-size:20px;color:var(--muted);margin-top:6px;line-height:1.35}
+
+/* big stat */
+.stat{background:#f3f6fa;border-left:9px solid var(--crimson);padding:22px 28px;border-radius:0 10px 10px 0}
+.stat .num{font-size:56px;font-weight:800;color:var(--navy);line-height:1.02;letter-spacing:-.02em;white-space:nowrap}
+.stat .num.wrap{white-space:normal;font-size:44px}
+.stat .num.red{color:var(--crimson)}
+.stat .lab{font-size:20px;color:var(--muted);margin-top:10px;line-height:1.35}
+.stat + .stat{margin-top:16px}
+/* Slide 3 stacks three stat boxes and the third one overflowed the body.
+   Tighten just those boxes so every caption survives intact. */
+.stat.sm{padding:16px 24px}
+.stat.sm .num{font-size:46px}
+.stat.sm .lab{font-size:18px;margin-top:8px}
+.stat.sm + .stat.sm{margin-top:12px}
+
+.callout{
+  background:var(--navy);color:#fff;padding:26px 32px;border-radius:10px;
+  font-size:28px;line-height:1.35;font-weight:600;
+}
+.callout em{color:#ffd9dc;font-style:normal;font-weight:800}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:22px}
+th{
+  text-align:left;font-size:17px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--muted);font-weight:700;padding:0 14px 12px;border-bottom:2px solid var(--navy);
+}
+th.n,td.n{text-align:right}
+td{padding:14px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:none}
+tr.hi td{background:#f3f6fa;font-weight:700;color:var(--navy)}
+tr.dim td{color:var(--muted)}
+.tag{
+  display:inline-block;background:var(--crimson);color:#fff;font-size:15px;
+  font-weight:700;padding:3px 10px;border-radius:20px;margin-left:10px;vertical-align:2px;
+}
+
+figure{display:flex;flex-direction:column;height:100%;justify-content:center;min-height:0}
+figure img{width:100%;height:auto;max-height:430px;object-fit:contain;border:1px solid var(--line);border-radius:8px}
+figcaption{font-size:18px;color:var(--muted);margin-top:12px;line-height:1.35}
+
+.foot{
+  position:absolute;left:72px;right:72px;bottom:24px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:16px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;
+}
+.slide.navy .foot{border-top-color:rgba(255,255,255,.25);color:#9dc2ea}
+.wordmark{font-weight:700;letter-spacing:.04em;color:var(--navy)}
+.slide.navy .wordmark{color:#fff}
+
+/* notes */
+#notes{
+  position:fixed;left:0;right:0;bottom:0;max-height:34vh;overflow:auto;
+  background:#12181e;color:#e6edf3;padding:20px 28px;font-size:15px;line-height:1.55;
+  border-top:3px solid var(--crimson);display:none;z-index:20;
+}
+#notes.on{display:block}
+#notes b{color:#ffb3b8}
+#hint{
+  position:fixed;top:14px;right:18px;color:#8b97a3;font-size:13px;z-index:20;
+  font-family:var(--font);
+}
+@media print{
+  body{background:#fff;display:block;overflow:visible}
+  #stage{transform:none!important;width:1280px;height:720px}
+  .slide{display:flex!important;page-break-after:always;position:relative;inset:auto}
+  #notes,#hint{display:none!important}
+}
+</style>
+</head>
+<body>
+
+<div id="hint">← → navigate &nbsp;·&nbsp; P presenter view &nbsp;·&nbsp; N notes &nbsp;·&nbsp; F fullscreen</div>
+
+<div id="stage">
+
+<!-- 1 ------------------------------------------------------------------ -->
+<section class="slide navy active"
+ data-notes="Hello. My name is Rajesh Kumar Sahoo. This is my capstone project for MSAI 699 at the University of the Cumberlands. Today I want to show you a model that predicts heart disease risk. But I also want to show you something more interesting than the model itself. I tested my own work, and that testing proved one of my earlier conclusions was wrong. Let me walk you through it.">
+  <div class="eyebrow">MSAI 699 Capstone Project</div>
+  <h1>Predicting Heart&nbsp;Disease Risk</h1>
+  <div class="sub">Building, testing, and correcting a clinical decision-support model</div>
+  <div class="rule"></div>
+  <div class="byline">
+    <strong>Rajesh Kumar Sahoo</strong><br>
+    University of the Cumberlands<br>
+    Master of Science in Artificial Intelligence &nbsp;·&nbsp; August 2026
+  </div>
+</section>
+
+<!-- 2 ------------------------------------------------------------------ -->
+<section class="slide"
+ data-notes="Let me start with the decision, not with the model. A doctor screening for heart disease has to answer one question. Who should be sent for further testing? Now here is the part that matters most. The two mistakes we can make do not cost the same. If we wrongly flag a healthy patient, that person gets one extra test. That is inconvenient. If we miss a patient who really has the disease, we send a sick person home. That is serious. So a screening tool should not be judged on how many mistakes it makes. It should be judged on which mistakes it makes. Please keep that in mind, because every decision I made follows from it.">
+  <div class="head">
+    <div class="eyebrow">The Problem</div>
+    <h2>The two errors do not cost the same</h2>
+  </div>
+  <div class="body">
+    <div class="cols">
+      <ul>
+        <li>Coronary artery disease is a leading cause of death worldwide
+          <small>Screening decisions rest on a handful of measurements from one visit</small></li>
+        <li>A model can estimate risk and flag who needs further testing</li>
+        <li>But a screening tool must be judged on <strong>which</strong> mistakes it makes, not how many</li>
+      </ul>
+      <div>
+        <div class="stat">
+          <div class="num">One more test</div>
+          <div class="lab">Cost of a <strong>false positive</strong>: a healthy patient is screened again</div>
+        </div>
+        <div class="stat">
+          <div class="num red">A missed diagnosis</div>
+          <div class="lab">Cost of a <strong>false negative</strong>: a sick patient is sent home</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="wordmark">University of the Cumberlands</span><span>2</span></div>
+</section>
+
+<!-- 3 ------------------------------------------------------------------ -->
+<section class="slide"
+ data-notes="Here is the data I used. It is the Cleveland heart disease database from the UCI repository. It has 303 patient records. Each record holds 13 clinical measurements, such as age, chest pain type, blood pressure, cholesterol, and maximum heart rate. About 46 percent of these patients have disease, so the two groups are close to balanced. I want to say the size out loud. 303 records is a small dataset. Almost everything interesting later in this talk comes from taking that small size seriously. One more thing you should know. This data comes from a single hospital, it was collected in 1989, and about 68 percent of the patients are men. I will come back to that at the end.">
+  <div class="head">
+    <div class="eyebrow">The Data</div>
+    <h2>UCI Cleveland heart disease database</h2>
+  </div>
+  <div class="body">
+    <div class="cols">
+      <div>
+        <div class="stat sm"><div class="num">303</div><div class="lab">Patient records. 242 train, 61 held out for testing</div></div>
+        <div class="stat sm"><div class="num">13</div><div class="lab">Clinical features: age, sex, chest pain type, blood pressure, cholesterol, max heart rate, ST depression, vessels, and more</div></div>
+        <div class="stat sm"><div class="num">45.9%</div><div class="lab">Positive rate. 139 disease, 164 no disease, so near balanced</div></div>
+      </div>
+      <ul>
+        <li>Only <strong>6 missing values</strong> in the whole dataset
+          <small>Imputed inside the pipeline, never before the split</small></li>
+        <li>Single site, collected 1989, about <strong>68% male</strong>
+          <small>This limits what can be claimed, and it shows up again at the end</small></li>
+        <li>Historical benchmark to beat: <strong>~77% accuracy</strong>
+          <small>Detrano et al. (1989), the study that published this data</small></li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span class="wordmark">University of the Cumberlands</span><span>3</span></div>
+</section>
+
+<!-- 4 ------------------------------------------------------------------ -->
+<section class="slide"
+ data-notes="This is my method in one slide. Everything sits inside a single pipeline. It fills in missing values, encodes the categories, scales the numbers, and then classifies the patient. I fit that pipeline on the training data only. That is what stops information leaking from the test set into the model. I split the data eighty twenty, so 242 patients for training and 61 held back for testing. I fixed the random seed and pinned every library version. The same pipeline object is reused when the model is served. So what runs in production is exactly what I trained. Every number you are about to see can be reproduced.">
+  <div class="head">
+    <div class="eyebrow">Methodology</div>
+    <h2>One leakage-free pipeline, reused everywhere</h2>
+  </div>
+  <div class="body">
+    <div class="cols wide-left">
+      <ul>
+        <li><strong>Baseline.</strong> Logistic regression. Interpretable coefficients, and the same model family as the 1989 study</li>
+        <li><strong>Optimization.</strong> One-hot encoding of 8 categorical codes, plus GridSearchCV on ROC-AUC</li>
+        <li><strong>Testing.</strong> Repeated cross-validation, paired significance tests, per-patient error analysis</li>
+        <li><strong>Deployment.</strong> FastAPI service, model loaded once at startup, same pipeline object</li>
+      </ul>
+      <div class="callout">
+        80/20 stratified split · seed 42<br>
+        Preprocessing fit on the training fold <em>only</em><br>
+        Versions pinned · data bundled · runs tracked in MLflow
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="wordmark">University of the Cumberlands</span><span>4</span></div>
+</section>
+
+<!-- 5 ------------------------------------------------------------------ -->
+<section class="slide"
+ data-notes="Here are my three models on the 61 held out patients. The baseline logistic regression reaches 87 percent accuracy. The original 1989 study that published this data reported about 77 percent, so my baseline already beats it. Then I added feature engineering and tuning. That lifted the ROC AUC from 0.951 to 0.968. And the gradient boosting model reached the highest raw accuracy, 90.2 percent against 88.5. So if you read down the accuracy column, gradient boosting looks like the clear winner. That is exactly what I concluded at the time. Please hold that thought.">
+  <div class="head">
+    <div class="eyebrow">Results, Baseline and Optimization</div>
+    <h2>Three models, and an obvious conclusion</h2>
+  </div>
+  <div class="body">
+    <table>
+      <tr><th>Model</th><th class="n">Accuracy</th><th class="n">Recall</th><th class="n">ROC-AUC</th></tr>
+      <tr class="dim"><td>A. Baseline logistic regression</td><td class="n">0.869</td><td class="n">0.929</td><td class="n">0.951</td></tr>
+      <tr class="hi"><td>B. Tuned LR + feature engineering</td><td class="n">0.885</td><td class="n">0.929</td><td class="n">0.968</td></tr>
+      <tr><td>C. Tuned gradient boosting <span class="tag">highest accuracy</span></td><td class="n">0.902</td><td class="n">0.867</td><td class="n">0.953</td></tr>
+    </table>
+    <div class="callout" style="margin-top:34px">
+      Reading down the accuracy column, gradient boosting wins by 1.7 points.<br>
+      <em>That conclusion turned out to be wrong.</em>
+    </div>
+  </div>
+  <div class="foot"><span class="wordmark">University of the Cumberlands</span><span>5</span></div>
+</section>
+
+<!-- 6 ------------------------------------------------------------------ -->
+<section class="slide"
+ data-notes="So I went back and tested it properly. This is the most important slide in my presentation. I used a test called McNemar&#x27;s exact test. It looks only at the patients where the two models disagree with each other. Here is what I found. The two models disagree on just two patients out of 61. Gradient boosting is right on one patient that the simpler model misses. And the simpler model is right on none. The p value is 1.00. So that entire accuracy advantage came down to one single patient. On a test set of 61 people, one patient is worth 1.6 percentage points. That is bigger than most of the gaps I had been comparing. On the right you can see the same story visually. Fifty cross validation runs for each model, and the three distributions overlap almost completely.">
+  <div class="head">
+    <div class="eyebrow">Results, A/B Testing</div>
+    <h2>The advantage was one patient</h2>
+  </div>
+  <div class="body">
+    <div class="cols wide-right" style="gap:40px">
+      <div>
+        <div class="stat">
+          <div class="num red">p = 1.00</div>
+          <div class="lab">McNemar's exact test. The two models disagree on <strong>2 of 61 patients</strong></div>
+        </div>
+        <div class="stat">
+          <div class="num">+0.020</div>
+          <div class="lab">ROC-AUC advantage to the <strong>simpler</strong> model across 50 folds. Nadeau-Bengio corrected test, <em>p</em> = 0.014</div>
+        </div>
+      </div>
+      <figure>
+        <img src="figures/fig1_cv_distribution.png" alt="Boxplots of ROC-AUC across 50 cross-validation folds for the three models, showing heavily overlapping distributions">
+        <figcaption>50 cross-validation folds per model. The distributions overlap almost completely, so a better mean is not evidence of a better model.</figcaption>
+      </figure>
+    </div>
+  </div>
+  <div class="foot"><span class="wordmark">University of the Cumberlands</span><span>6</span></div>
+</section>
+
+<!-- 7 ------------------------------------------------------------------ -->
+<section class="slide"
+ data-notes="My next question was this. Where does the model actually fail? It gets 7 of the 61 patients wrong. So I grouped every prediction by how confident the model was, and something useful appeared. Every single error falls in the middle, between 0.2 and 0.8. Now look at the two ends of this chart. Among the 38 patients the model was confident about, there are zero errors. That is 62 percent of patients classified with no mistakes at all. This matters because it is actionable. You cannot fix a model that fails randomly. But you can work around a model that fails inside a band you can identify in advance.">
+  <div class="head">
+    <div class="eyebrow">Results, Error Analysis</div>
+    <h2>Every error lives in one narrow band</h2>
+  </div>
+  <div class="body">
+    <div class="cols wide-right" style="gap:40px">
+      <div>
+        <div class="stat">
+          <div class="num">7 of 61</div>
+          <div class="lab">Misclassified. 5 false positives, 2 false negatives</div>
+        </div>
+        <div class="stat">
+          <div class="num red">0 errors</div>
+          <div class="lab">Among the <strong>38 confident predictions</strong> scored below 0.2 or above 0.8. That is 62% of patients</div>
+        </div>
+      </div>
+      <figure>
+        <img src="figures/fig2_error_by_probability_band.png" alt="Bar chart of error rate by predicted probability band, showing errors only in the 0.2 to 0.8 range">
+        <figcaption>Errors concentrate where the model is uncertain. The two ends are error-free.</figcaption>
+      </figure>
+    </div>
+  </div>
+  <div class="foot"><span class="wordmark">University of the Cumberlands</span><span>7</span></div>
+</section>
+
+<!-- 8 ------------------------------------------------------------------ -->
+<section class="slide"
+ data-notes="Now here is the fix. Remember the two missed diagnoses. I looked at both of them individually. They scored 0.303 and 0.421. Both sat just below the standard cut off of 0.5. So the model had actually ranked both patients as elevated risk. It was the cut off that threw that information away. The ranking was never wrong. The threshold was wrong. So I stated my assumption openly. I treated a missed diagnosis as five times as costly as a false alarm. When you work out the cost with that ratio, the best cut off is 0.25, not 0.5. Moving it there removes both missed diagnoses and takes recall to 100 percent. It costs me five extra false alarms and about five points of accuracy. I chose that trade deliberately.">
+  <div class="head">
+    <div class="eyebrow">Results, Reliability</div>
+    <h2>Both missed diagnoses were a threshold problem</h2>
+  </div>
+  <div class="body">
+    <div class="cols wide-right" style="gap:40px">
+      <div>
+        <table style="font-size:21px">
+          <tr><th>Threshold</th><th class="n">Recall</th><th class="n">Missed</th><th class="n">Acc.</th></tr>
+          <tr class="dim"><td>0.50 default</td><td class="n">0.929</td><td class="n">2</td><td class="n">0.885</td></tr>
+          <tr class="hi"><td>0.25 chosen</td><td class="n">1.000</td><td class="n">0</td><td class="n">0.836</td></tr>
+        </table>
+        <div class="stat" style="margin-top:24px">
+          <div class="num red">0.303 &nbsp;·&nbsp; 0.421</div>
+          <div class="lab">Scores of the two missed cases. Both sat just under the 0.5 cut-off. The model <strong>did</strong> rank them as risky.</div>
+        </div>
+      </div>
+      <figure>
+        <img src="figures/fig3_threshold_sweep.png" alt="Precision-recall trade-off curve and misclassification cost curve across decision thresholds, with cost minimized at 0.25">
+        <figcaption>Cost is lowest at 0.25 when a false negative counts five times. Every ratio favoring recall lands below the 0.5 default.</figcaption>
+      </figure>
+    </div>
+  </div>
+  <div class="foot"><span class="wordmark">University of the Cumberlands</span><span>8</span></div>
+</section>
+
+<!-- 9 ------------------------------------------------------------------ -->
+<section class="slide"
+ data-notes="I did not stop at the analysis. Both findings went into my prediction service, which is now version 1.1.0. First, the threshold is now 0.25, so there are no missed diagnoses on the held out set. Second, any prediction that lands in that uncertain band between 0.2 and 0.8 now comes back with a review flag and a short reason. It goes to a clinician instead of being returned as a confident answer. The test suite grew from 7 tests to 10, and all of them pass. I also have a public demo running online, but that one is my earlier Week 3 baseline. The point I want to leave you with is simple. An error analysis that changes nothing is just an academic exercise. These findings changed the code that serves patients.">
+  <div class="head">
+    <div class="eyebrow">What Shipped</div>
+    <h2>Both findings shipped into the service</h2>
+  </div>
+  <div class="body">
+    <div class="cols">
+      <ul>
+        <li><strong>Threshold moved to 0.25</strong>
+          <small>Zero false negatives on the held-out set</small></li>
+        <li><strong>New <code>requires_review</code> flag</strong>
+          <small>Any prediction between 0.2 and 0.8 returns with a reason and routes to a clinician</small></li>
+        <li><strong>FastAPI service, version 1.1.0</strong>
+          <small>Pydantic validation, model loaded once at startup, no patient data in logs</small></li>
+        <li><strong>Test suite grew from 7 to 10</strong>
+          <small>All passing. Runs tracked in MLflow</small></li>
+      </ul>
+      <div class="callout">
+        An error analysis that changes nothing is an academic exercise.<br><br>
+        <em>These findings changed the system.</em>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="wordmark">University of the Cumberlands</span><span>9</span></div>
+</section>
+
+<!-- 10 ----------------------------------------------------------------- -->
+<section class="slide"
+ data-notes="Let me finish honestly, with what I would not claim. My test set is only 61 patients. So every number I break down by subgroup is unstable. Six of my seven errors were male patients. I am reporting that as something to monitor, not as proven bias, because I only had 20 women in the test set. I also tuned the threshold on the same data I measured it on, which risks being too optimistic. And this data comes from one hospital in 1989, so it may not describe patients today. Let me be very clear on this point. This is educational decision support. It is not medical advice, and a clinician stays in the loop for every decision. My next step is to add the Hungarian, Switzerland, and VA patient groups. That single change would relieve most of these limits at once. Thank you for listening. I am happy to take your questions.">
+  <div class="head">
+    <div class="eyebrow">Limits and Next Steps</div>
+    <h2>What I would not claim, and what comes next</h2>
+  </div>
+  <div class="body">
+    <div class="cols">
+      <ul>
+        <li><strong>61 test patients.</strong> Every subgroup estimate is wide</li>
+        <li><strong>6 of 7 errors were male.</strong> A signal to monitor, not proven bias</li>
+        <li><strong>Threshold tuned on the data it is measured on.</strong> Nested CV is the correct fix</li>
+        <li><strong>Single site, 1989, 68% male.</strong> May not transfer to a modern population</li>
+      </ul>
+      <div>
+        <div class="callout" style="background:var(--crimson)">
+          Next step: aggregate the Hungarian, Switzerland,<br>and VA cohorts.<br>This relieves most limits at once
+        </div>
+        <div class="stat" style="margin-top:26px">
+          <div class="lab" style="margin-top:0;font-size:21px">
+            Educational decision support only.<br>
+            <strong>Not medical advice.</strong> A clinician stays in the loop.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="wordmark">University of the Cumberlands</span><span>10</span></div>
+</section>
+
+</div>
+
+<div id="notes"></div>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+const notes=document.getElementById('notes');
+const stage=document.getElementById('stage');
+let i=0, showNotes=false, presenter=null;
+
+/* keep the presenter view in step */
+function broadcast(){
+  const msg={type:'slide',slide:i};
+  if(presenter&&!presenter.closed) presenter.postMessage(msg,'*');
+  if(window.opener&&!window.opener.closed) window.opener.postMessage(msg,'*');
+}
+function openPresenter(){
+  presenter=window.open('presenter.html','presenterWindow');
+  setTimeout(()=>{ if(presenter&&!presenter.closed){ presenter.postMessage({type:'hello'},'*'); broadcast(); } },900);
+}
+window.addEventListener('message',e=>{
+  const d=e.data||{};
+  if(d.type==='goto'&&typeof d.slide==='number'&&d.slide!==i){ i=d.slide; render(false); }
+  if(d.type==='hello'){ presenter=e.source; broadcast(); }
+});
+
+/* SYNC-BLOCK-START
+   postMessage only reaches a window this one opened. Two windows opened
+   straight from Finder are strangers to each other, so the slide number is
+   also mirrored through localStorage, which Chrome shares across every
+   file:// page. The storage event is not reliable between local windows,
+   so poll as well. Adopting a change calls render(false) and never
+   publishes, which is what stops the two windows echoing each other. */
+const SYNC_KEY='capstone_deck_sync';
+const ME='deck-'+Math.random().toString(36).slice(2);
+function publish(){
+  try{ localStorage.setItem(SYNC_KEY,JSON.stringify({slide:i,from:ME,t:Date.now()})); }catch(e){}
+}
+function syncPull(){
+  try{
+    const d=JSON.parse(localStorage.getItem(SYNC_KEY)||'null');
+    if(!d||d.from===ME||typeof d.slide!=='number') return;
+    const n=Math.max(0,Math.min(slides.length-1,d.slide));
+    if(n!==i){ i=n; render(false); }
+  }catch(e){}
+}
+window.addEventListener('storage',e=>{ if(e.key===SYNC_KEY) syncPull(); });
+setInterval(syncPull,250);
+/* SYNC-BLOCK-END */
+
+function fit(){
+  const pad = showNotes ? window.innerHeight*0.36 : 0;
+  const s=Math.min(window.innerWidth/1280,(window.innerHeight-pad)/720);
+  stage.style.transform='scale('+s+')';
+}
+function render(push){
+  slides.forEach((s,n)=>s.classList.toggle('active',n===i));
+  notes.innerHTML='<b>Slide '+(i+1)+' of '+slides.length+'</b> &nbsp; '+(slides[i].dataset.notes||'');
+  fit();
+  if(push!==false) broadcast();
+}
+function go(n){ i=Math.max(0,Math.min(slides.length-1,n)); render(); publish(); }
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(i+1)}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(i-1)}
+  else if(e.key==='Home'){go(0)} else if(e.key==='End'){go(slides.length-1)}
+  else if(e.key.toLowerCase()==='n'){showNotes=!showNotes;notes.classList.toggle('on',showNotes);fit()}
+  else if(e.key.toLowerCase()==='f'){
+    document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
+  }
+  else if(e.key.toLowerCase()==='p'){openPresenter()}
+});
+document.addEventListener('click',e=>{ if(!e.target.closest('#notes')) go(i+1) });
+window.addEventListener('resize',fit);
+if(window.opener&&!window.opener.closed){ presenter=window.opener; }
+render();
+publish();   /* the deck is the source of truth on load */
+</script>
+</body>
+</html>
