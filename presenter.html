@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Presenter View - MSAI 699 Capstone</title>
+<style>
+:root{
+  --navy:#003b70; --crimson:#b21e27;
+  --bg:#0f1419; --panel:#1a222b; --line:#2c3844;
+  --text:#e8eef4; --dim:#8fa1b3;
+  --font:"Source Sans Pro","Lato",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex;flex-direction:column;overflow:hidden}
+
+header{
+  display:flex;align-items:center;gap:20px;
+  padding:14px 26px;background:var(--navy);border-bottom:4px solid var(--crimson);flex:none;
+}
+header .badge{
+  background:#fff;color:var(--navy);font-weight:800;font-size:15px;
+  padding:5px 13px;border-radius:20px;letter-spacing:.05em;
+}
+header .who{font-size:15px;color:#c8dcf0;margin-left:auto}
+#link{
+  background:var(--crimson);color:#fff;border:0;font:inherit;font-weight:700;font-size:14px;
+  padding:7px 15px;border-radius:6px;cursor:pointer;
+}
+#link.ok{background:#1f7a4d}
+
+main{flex:1;display:grid;grid-template-columns:1fr 340px;gap:0;min-height:0}
+
+#left{padding:26px 34px;display:flex;flex-direction:column;min-height:0}
+.pos{display:flex;align-items:baseline;gap:16px;margin-bottom:6px}
+.pos .num{font-size:52px;font-weight:800;color:var(--crimson);line-height:1}
+.pos .of{font-size:17px;color:var(--dim);letter-spacing:.09em;text-transform:uppercase}
+.eyebrow{font-size:14px;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);font-weight:700;margin-bottom:6px}
+h1{font-size:33px;line-height:1.15;font-weight:800;color:#fff;margin-bottom:20px;letter-spacing:-.01em}
+
+#say{
+  flex:1;overflow-y:auto;background:var(--panel);border-left:6px solid var(--crimson);
+  border-radius:0 10px 10px 0;padding:26px 30px;font-size:25px;line-height:1.55;min-height:0;
+}
+#say p{margin-bottom:16px}
+#say p:last-child{margin-bottom:0}
+#say .lead{color:#ffd9dc;font-weight:700}
+
+#right{border-left:1px solid var(--line);padding:26px 24px;display:flex;flex-direction:column;gap:22px;min-height:0}
+
+.card{background:var(--panel);border-radius:10px;padding:18px 20px}
+.card h2{font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);font-weight:700;margin-bottom:12px}
+
+#clock{font-size:58px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+#clock.under{color:#8fa1b3}
+#clock.good{color:#3ddc84}
+#clock.over{color:#ff6b6b}
+#target{font-size:14px;color:var(--dim);margin-top:10px;line-height:1.4}
+.btns{display:flex;gap:8px;margin-top:14px}
+.btns button{
+  flex:1;background:#2c3844;color:var(--text);border:0;font:inherit;font-size:14px;font-weight:700;
+  padding:8px 0;border-radius:6px;cursor:pointer;
+}
+.btns button:hover{background:#3a4956}
+
+#next{font-size:19px;line-height:1.35;color:#fff;font-weight:600}
+#next .n{color:var(--crimson);font-weight:800}
+#nextnone{color:var(--dim);font-style:italic;font-size:17px}
+
+#bar{height:8px;background:#2c3844;border-radius:4px;overflow:hidden;margin-top:auto}
+#fill{height:100%;background:var(--crimson);width:0;transition:width .18s}
+
+.keys{font-size:13px;color:var(--dim);line-height:1.9}
+.keys b{color:var(--text);background:#2c3844;padding:1px 7px;border-radius:4px;font-weight:700}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="badge">PRESENTER VIEW</span>
+  <button id="link">Open &amp; link slides</button>
+  <span class="who">Rajesh Kumar Sahoo &nbsp;&middot;&nbsp; MSAI 699 Capstone</span>
+</header>
+
+<main>
+  <section id="left">
+    <div class="pos"><span class="num" id="num">1</span><span class="of" id="of">of 10</span></div>
+    <div class="eyebrow" id="eyebrow"></div>
+    <h1 id="title"></h1>
+    <div id="say"></div>
+  </section>
+
+  <aside id="right">
+    <div class="card">
+      <h2>Elapsed</h2>
+      <div id="clock" class="under">0:00</div>
+      <div id="target">Target 5 to 10 minutes.<br>Green from 5:00. Red after 10:00.</div>
+      <div class="btns">
+        <button id="startstop">Start</button>
+        <button id="reset">Reset</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Coming up next</h2>
+      <div id="next"></div>
+    </div>
+
+    <div class="card">
+      <h2>Keys</h2>
+      <div class="keys">
+        <b>&rarr;</b> / <b>Space</b> next slide<br>
+        <b>&larr;</b> previous slide<br>
+        <b>T</b> start or stop timer<br>
+        <b>R</b> reset timer
+      </div>
+    </div>
+
+    <div id="bar"><div id="fill"></div></div>
+  </aside>
+</main>
+
+<script>
+const SLIDES = [
+ {
+  "n": 1,
+  "eyebrow": "MSAI 699 Capstone Project",
+  "title": "Predicting Heart Disease Risk",
+  "notes": "Hello. My name is Rajesh Kumar Sahoo. This is my capstone project for MSAI 699 at the University of the Cumberlands. Today I want to show you a model that predicts heart disease risk. But I also want to show you something more interesting than the model itself. I tested my own work, and that testing proved one of my earlier conclusions was wrong. Let me walk you through it."
+ },
+ {
+  "n": 2,
+  "eyebrow": "The Problem",
+  "title": "The two errors do not cost the same",
+  "notes": "Let me start with the decision, not with the model. A doctor screening for heart disease has to answer one question. Who should be sent for further testing? Now here is the part that matters most. The two mistakes we can make do not cost the same. If we wrongly flag a healthy patient, that person gets one extra test. That is inconvenient. If we miss a patient who really has the disease, we send a sick person home. That is serious. So a screening tool should not be judged on how many mistakes it makes. It should be judged on which mistakes it makes. Please keep that in mind, because every decision I made follows from it."
+ },
+ {
+  "n": 3,
+  "eyebrow": "The Data",
+  "title": "UCI Cleveland heart disease database",
+  "notes": "Here is the data I used. It is the Cleveland heart disease database from the UCI repository. It has 303 patient records. Each record holds 13 clinical measurements, such as age, chest pain type, blood pressure, cholesterol, and maximum heart rate. About 46 percent of these patients have disease, so the two groups are close to balanced. I want to say the size out loud. 303 records is a small dataset. Almost everything interesting later in this talk comes from taking that small size seriously. One more thing you should know. This data comes from a single hospital, it was collected in 1989, and about 68 percent of the patients are men. I will come back to that at the end."
+ },
+ {
+  "n": 4,
+  "eyebrow": "Methodology",
+  "title": "One leakage-free pipeline, reused everywhere",
+  "notes": "This is my method in one slide. Everything sits inside a single pipeline. It fills in missing values, encodes the categories, scales the numbers, and then classifies the patient. I fit that pipeline on the training data only. That is what stops information leaking from the test set into the model. I split the data eighty twenty, so 242 patients for training and 61 held back for testing. I fixed the random seed and pinned every library version. The same pipeline object is reused when the model is served. So what runs in production is exactly what I trained. Every number you are about to see can be reproduced."
+ },
+ {
+  "n": 5,
+  "eyebrow": "Results, Baseline and Optimization",
+  "title": "Three models, and an obvious conclusion",
+  "notes": "Here are my three models on the 61 held out patients. The baseline logistic regression reaches 87 percent accuracy. The original 1989 study that published this data reported about 77 percent, so my baseline already beats it. Then I added feature engineering and tuning. That lifted the ROC AUC from 0.951 to 0.968. And the gradient boosting model reached the highest raw accuracy, 90.2 percent against 88.5. So if you read down the accuracy column, gradient boosting looks like the clear winner. That is exactly what I concluded at the time. Please hold that thought."
+ },
+ {
+  "n": 6,
+  "eyebrow": "Results, A/B Testing",
+  "title": "The advantage was one patient",
+  "notes": "So I went back and tested it properly. This is the most important slide in my presentation. I used a test called McNemar's exact test. It looks only at the patients where the two models disagree with each other. Here is what I found. The two models disagree on just two patients out of 61. Gradient boosting is right on one patient that the simpler model misses. And the simpler model is right on none. The p value is 1.00. So that entire accuracy advantage came down to one single patient. On a test set of 61 people, one patient is worth 1.6 percentage points. That is bigger than most of the gaps I had been comparing. On the right you can see the same story visually. Fifty cross validation runs for each model, and the three distributions overlap almost completely."
+ },
+ {
+  "n": 7,
+  "eyebrow": "Results, Error Analysis",
+  "title": "Every error lives in one narrow band",
+  "notes": "My next question was this. Where does the model actually fail? It gets 7 of the 61 patients wrong. So I grouped every prediction by how confident the model was, and something useful appeared. Every single error falls in the middle, between 0.2 and 0.8. Now look at the two ends of this chart. Among the 38 patients the model was confident about, there are zero errors. That is 62 percent of patients classified with no mistakes at all. This matters because it is actionable. You cannot fix a model that fails randomly. But you can work around a model that fails inside a band you can identify in advance."
+ },
+ {
+  "n": 8,
+  "eyebrow": "Results, Reliability",
+  "title": "Both missed diagnoses were a threshold problem",
+  "notes": "Now here is the fix. Remember the two missed diagnoses. I looked at both of them individually. They scored 0.303 and 0.421. Both sat just below the standard cut off of 0.5. So the model had actually ranked both patients as elevated risk. It was the cut off that threw that information away. The ranking was never wrong. The threshold was wrong. So I stated my assumption openly. I treated a missed diagnosis as five times as costly as a false alarm. When you work out the cost with that ratio, the best cut off is 0.25, not 0.5. Moving it there removes both missed diagnoses and takes recall to 100 percent. It costs me five extra false alarms and about five points of accuracy. I chose that trade deliberately."
+ },
+ {
+  "n": 9,
+  "eyebrow": "In Production",
+  "title": "The findings changed the running service",
+  "notes": "I did not stop at the analysis. Both findings went into the live service, which is now version 1.1.0. First, the threshold is now 0.25, so there are no missed diagnoses on the held out set. Second, any prediction that lands in that uncertain band between 0.2 and 0.8 now comes back with a review flag and a short reason. It goes to a clinician instead of being returned as a confident answer. The test suite grew from 7 tests to 10, and all of them pass. There is also a live demo of the model running online. The point I want to leave you with is simple. An error analysis that changes nothing is just an academic exercise. These findings changed the running system."
+ },
+ {
+  "n": 10,
+  "eyebrow": "Limits and Next Steps",
+  "title": "What I would not claim, and what comes next",
+  "notes": "Let me finish honestly, with what I would not claim. My test set is only 61 patients. So every number I break down by subgroup is unstable. Six of my seven errors were male patients. I am reporting that as something to monitor, not as proven bias, because I only had 20 women in the test set. I also tuned the threshold on the same data I measured it on, which risks being too optimistic. And this data comes from one hospital in 1989, so it may not describe patients today. Let me be very clear on this point. This is educational decision support. It is not medical advice, and a clinician stays in the loop for every decision. My next step is to add the Hungarian, Switzerland, and VA patient groups. That single change would relieve most of these limits at once. Thank you for listening. I am happy to take your questions."
+ }
+];
+
+const $=id=>document.getElementById(id);
+let i=0, deck=null, running=false, t0=0, acc=0;
+
+/* ---------- render ---------- */
+function paragraphs(text){
+  // Split into chunks of 2 sentences. Break only on end-punctuation followed by
+  // whitespace and a capital, so decimals such as 0.2 and 0.8 stay intact.
+  // split() never drops characters, unlike a match()-based approach.
+  const sents=text.split(/(?<=[.?!])\s+(?=[A-Z"'(])/);
+  const out=[]; for(let k=0;k<sents.length;k+=2) out.push(sents.slice(k,k+2).join(' ').trim());
+  return out.filter(Boolean);
+}
+function render(){
+  const s=SLIDES[i];
+  $('num').textContent=s.n;
+  $('of').textContent='of '+SLIDES.length;
+  $('eyebrow').textContent=s.eyebrow||'';
+  $('title').textContent=s.title||'';
+  const ps=paragraphs(s.notes);
+  $('say').innerHTML=ps.map((p,k)=>'<p'+(k===0?' class="lead"':'')+'>'+p+'</p>').join('');
+  $('say').scrollTop=0;
+  const nx=SLIDES[i+1];
+  $('next').innerHTML = nx
+    ? '<span class="n">'+nx.n+'.</span> '+nx.title
+    : '<span id="nextnone">Last slide. Close on the limits, then invite questions.</span>';
+  $('fill').style.width=((i+1)/SLIDES.length*100)+'%';
+  autofit();
+}
+/* Shrink the script until it fits. Nothing should ever sit below the fold
+   while presenting, least of all the closing lines. */
+function autofit(){
+  const el=$('say');
+  let size=25;
+  el.style.fontSize=size+'px';
+  while(el.scrollHeight>el.clientHeight && size>15){ size-=1; el.style.fontSize=size+'px'; }
+}
+window.addEventListener('resize',autofit);
+function go(n,push){
+  i=Math.max(0,Math.min(SLIDES.length-1,n));
+  render();
+  if(push&&deck&&!deck.closed) deck.postMessage({type:'goto',slide:i},'*');
+}
+
+/* ---------- timer ---------- */
+function ms(){ return acc + (running ? Date.now()-t0 : 0); }
+function tick(){
+  const total=Math.floor(ms()/1000);
+  const m=Math.floor(total/60), sec=total%60;
+  const c=$('clock');
+  c.textContent=m+':'+String(sec).padStart(2,'0');
+  c.className = total>=600 ? 'over' : (total>=300 ? 'good' : 'under');
+}
+$('startstop').onclick=()=>{
+  if(running){ acc=ms(); running=false; $('startstop').textContent='Start'; }
+  else { t0=Date.now(); running=true; $('startstop').textContent='Pause'; }
+};
+$('reset').onclick=()=>{ running=false; acc=0; $('startstop').textContent='Start'; tick(); };
+setInterval(tick,250);
+
+/* ---------- link to the deck ---------- */
+$('link').onclick=()=>{
+  deck=window.open('presentation.html','deckWindow');
+  const b=$('link');
+  b.textContent='Slides linked';
+  b.classList.add('ok');
+  setTimeout(()=>{ if(deck&&!deck.closed) deck.postMessage({type:'goto',slide:i},'*'); }, 900);
+};
+
+window.addEventListener('message',e=>{
+  const d=e.data||{};
+  if(d.type==='slide'&&typeof d.slide==='number'){ i=d.slide; render(); }
+  if(d.type==='hello'){ deck=e.source; $('link').textContent='Slides linked'; $('link').classList.add('ok'); }
+});
+if(window.opener){ deck=window.opener; $('link').textContent='Slides linked'; $('link').classList.add('ok'); }
+
+document.addEventListener('keydown',e=>{
+  const k=e.key.toLowerCase();
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(i+1,true)}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(i-1,true)}
+  else if(e.key==='Home'){go(0,true)} else if(e.key==='End'){go(SLIDES.length-1,true)}
+  else if(k==='t'){$('startstop').click()} else if(k==='r'){$('reset').click()}
+});
+
+render(); tick();
+</script>
+</body>
+</html>
